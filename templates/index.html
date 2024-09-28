@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Consulta de Dados</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Dados</h1>
+        <form method="POST" class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Digite Nome">
+                </div>
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" name="cpf" placeholder="Digite CPF">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cnpj">CNPJ</label>
+                    <input type="text" id="cnpj" name="cnpj" placeholder="Digite CNPJ">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="coringa">Pesquisa Coringa</label>
+                    <input type="text" id="coringa" name="coringa" placeholder="Digite um NOME, Email ou Telefone">
+                </div>
+            </div>
+            <!-- Adiciona um espaço entre o campo de pesquisa coringa e o botão -->
+            <div class="form-row" style="margin-bottom: 20px;">
+                <button type="submit" class="btn-primary">Buscar</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="folder_path">Caminho da Pasta</label>
+                    <input type="text" id="folder_path" name="folder_path" placeholder="Digite o caminho da pasta">
+                </div>   
+            </div>
+            <button type="submit" formaction="{{ url_for('unify_excel') }}" formmethod="POST" class="btn-secondary">Unificar Escrituras e Procurações</button>
+        </form>
+
+        <h2>Resultados</h2>
+        {% if resultados %}
+            <form method="POST" action="/export">
+                <input type="hidden" name="resultados" value="{{ resultados }}">
+                <button type="submit" class="btn-secondary">Exportar para Excel</button>
+            </form>
+
+            {% for cnpj_raiz, dados in resultados.items() %}
+                <div class="result-block">
+                    {% for resultado, origem_tabela in dados %}
+                        {% if "empresas" in origem_tabela.lower() %}
+                            <div class="empresa">
+                                <h2><strong>Nome da Empresa:</strong> {{ resultado[1] }}</h3>
+                                <p><strong>Natureza Jurídica:</strong> {{ resultado[2] }}</p>
+                                <p><strong>Qualificação do Responsável:</strong> {{ resultado[3] }}</p>
+                                <p><strong>Capital Social:</strong> {{ resultado[4] }}</p>
+                                <p><strong>Porte da Empresa:</strong> {{ resultado[5] }}</p>
+                                <p><strong>Ente Federativo:</strong> {{ resultado[6] }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for resultado, origem_tabela in dados %}
+                        {% if "socios" in origem_tabela.lower() %}
+                            <div class="socio">
+                                <h3><strong>Sócios:</strong> {{ resultado[5] }}</h3>
+                                <p><strong>País:</strong> {{ resultado[1] }}</p>
+                                <p><strong>Representante Legal:</strong> {{ resultado[2] }}</p>
+                                <p><strong>Nome do Representante:</strong> {{ resultado[3] }}</p>
+                                <p><strong>Qualificação do Representante:</strong> {{ resultado[4] }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for resultado, origem_tabela in dados %}
+                        {% if "estabelecimentos" in origem_tabela.lower() %}
+                            <div class="estabelecimento">
+                                <h3><strong>Matriz/Filial:</strong> {{ resultado[1] }}</h3>
+                                <p><strong>Nome Fantasia:</strong> {{ resultado[2] }}</p>
+                                <p><strong>Situação Cadastral:</strong> {{ resultado[3] }}</p>
+                                <p><strong>Data Situação Cadastral:</strong> {{ resultado[4] }}</p>
+                                <p><strong>Motivo Situação Cadastral:</strong> {{ resultado[5] }}</p>
+                                <p><strong>Nome da Cidade no Exterior:</strong> {{ resultado[6] }}</p>
+                                <p><strong>País:</strong> {{ resultado[7] }}</p>
+                                <p><strong>Data de Início de Atividade:</strong> {{ resultado[8] }}</p>
+                                <p><strong>CNAE Principal:</strong> {{ resultado[9] }}</p>
+                                <p><strong>CNAE Secundário:</strong> {{ resultado[10] }}</p>
+                                <p><strong>Correio Eletrônico:</strong> {{ resultado[11] }}</p>
+                                <p><strong>Situação Especial:</strong> {{ resultado[12] }}</p>
+                                <p><strong>Data Situação Especial:</strong> {{ resultado[13] }}</p>
+                                <p><strong>CNPJ Completo:</strong> {{ resultado[14] }}</p>
+                                <p><strong>Endereço:</strong> {{ resultado[15] }}</p>
+                                <p><strong>Telefones:</strong> {{ resultado[16] }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Nenhum resultado encontrado.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
