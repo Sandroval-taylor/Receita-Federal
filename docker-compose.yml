@@ -3,7 +3,7 @@ services:
   flask-app:
     build: .
     ports:
-      - "5000:5000"  # Porta no host e no container
+      - "80:5000"  # Porta no host e no container
     environment:
       - FLASK_ENV=development
     volumes:
