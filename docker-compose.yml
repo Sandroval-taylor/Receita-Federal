@@ -1,10 +1,9 @@
-version: "3"
+version: '3'
+
 services:
-  flask-app:
+  web:
     build: .
     ports:
-      - "80:5000"  # Porta no host e no container
+      - "80:5000"
     environment:
-      - FLASK_ENV=development
-    volumes:
-      - .:/app
+      FLASK_ENV: development

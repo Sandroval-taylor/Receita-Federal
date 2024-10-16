@@ -1,19 +1,20 @@
-# Usar uma imagem base do Python
-FROM python:3.10-slim
+# Use uma imagem base oficial do Python
+FROM python:3.9
 
-
-# Definir o diretório de trabalho no container
+# Defina o diretório de trabalho
 WORKDIR /app
 
-# Copiar as dependências
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+# Copie o arquivo requirements.txt (que vamos criar em seguida)
+COPY requirements.txt .
 
-# Copiar o código da aplicação Flask
+# Instale as dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie todo o conteúdo do diretório atual para o contêiner
 COPY . .
 
-# Expor a porta 5000 (ou outra porta que você está usando)
+# Exponha a porta 5000, que o Flask usará
 EXPOSE 5000
 
-# Comando para rodar a aplicação
+# Defina o comando para rodar a aplicação Flask
 CMD ["python", "app.py"]
