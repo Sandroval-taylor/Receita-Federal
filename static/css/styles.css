@@ -98,7 +98,7 @@ button:hover {
     color: red;
     font-weight: bold;
 }
-/* Define cor vermelha para status "Suspensa" */
+/* Define cor laranja para status "Suspensa" */
 .status-orange {
     color: orange;
 }
