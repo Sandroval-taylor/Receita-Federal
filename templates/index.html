@@ -69,9 +69,13 @@
                             <p><strong>Filial ou Matriz:</strong> {{ estabelecimentos_identificador_matriz_filial[index] }}</p>
                             <p><strong>Endereço:</strong> {{ estabelecimentos_endereco[index] }}</p>
                             <p><strong>Status:</strong>
-                               <span class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red{% else %}status-green{% endif %}">
-                                   {{ estabelecimentos_situacao_cadastral[index] }}
-                               </span>
+                                <span class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red
+                                             {% elif estabelecimentos_situacao_cadastral[index] in ['Inapta', 'Suspensa'] %}status-orange
+                                             {% else %}status-green{% endif %}">
+                                    {{ estabelecimentos_situacao_cadastral[index] }}
+                                </span>
+                            </p>
+                            
                             </p>
                             <p><strong>Data Status:</strong> {{ estabelecimentos_data_situacao_cadastral[index] }}</p>
                             <p><strong>Motivo Status:</strong> {{ estabelecimentos_motivo_situacao_cadastral[index] }}</p>
