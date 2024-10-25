@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, jsonify, send_file
+from flasgger import Swagger
 import psycopg2
 import pandas as pd
 import io
 import xlsxwriter
+import json
 
 app = Flask(__name__)
+swagger = Swagger(app)
 # Configurações do banco de dados
 DB_HOST = "postgresql-171633-0.cloudclusters.net"
 DB_PORT = "18857"
@@ -441,7 +444,96 @@ def export_excel():
     workbook.close()
     output.seek(0)
     return send_file(output, download_name='resultado.xlsx', as_attachment=True)
-@app.route("/", methods=["GET", "POST"]) ##Rota Principal
+@app.route("/api/pesquisa", methods=["POST"]) ##Rota para Swagger
+def api_pesquisa():
+    """
+    Endpoint para realizar pesquisas no banco de dados e retornar resultados em JSON
+    ---
+    parameters:
+      - name: cnpj
+        in: formData
+        type: string
+        required: false
+        description: CNPJ para realizar a pesquisa
+      - name: nome
+        in: formData
+        type: string
+        required: false
+        description: Nome para realizar a pesquisa
+      - name: cpf
+        in: formData
+        type: string
+        required: false
+        description: CPF para realizar a pesquisa
+      - name: coringa
+        in: formData
+        type: string
+        required: false
+        description: Palavra-chave coringa para realizar a pesquisa
+    responses:
+      200:
+        description: Resultados da pesquisa em JSON
+    """
+    cnpj = request.form.get("cnpj")
+    nome = request.form.get("nome")
+    cpf = request.form.get("cpf")
+    coringa = request.form.get("coringa")
+    
+    conn = connect_to_db()
+    if conn:
+        cursor = conn.cursor()
+        if cnpj:
+            pesquisar_cnpj(cursor, cnpj)
+        elif nome and cpf:
+            cpf_tratado = tratar_cpf(cpf)
+            pesquisar_por_nome_e_cpf(cursor, nome, cpf_tratado)
+        elif coringa:
+            pesquisar_coringa(cursor, coringa)
+
+        # Gerar JSON de resultado
+        resultado_json = {
+            "sócios": {
+                "CNPJ Raiz": socios_Cnpj_Raiz,
+                "País": socios_pais,
+                "Representante Legal": socios_repre_legal,
+                "Nome Representante": socios_nome_repre,
+                "Qualificação Representante": socios_quali_repre,
+                "Sócios": socios_socios
+            },
+            "empresas": {
+                "CNPJ Raiz": empresas_Cnpj_Raiz,
+                "Nome": empresas_nome,
+                "Capital Social": empresas_capital_social,
+                "Ente Federativo": empresas_ente_federativo,
+                "Qualificação Responsável": empresas_quali_responsavel,
+                "Natureza Jurídica": empresas_natureza_juridica,
+                "Porte": empresas_porte
+            },
+            "estabelecimentos": {
+                "CNPJ Raiz": estabelecimentos_Cnpj_Raiz,
+                "Identificador Matriz/Filial": estabelecimentos_identificador_matriz_filial,
+                "Nome Fantasia": estabelecimentos_nome_fantasia,
+                "Situação Cadastral": estabelecimentos_situacao_cadastral,
+                "Data Situação Cadastral": estabelecimentos_data_situacao_cadastral,
+                "Motivo Situação Cadastral": estabelecimentos_motivo_situacao_cadastral,
+                "Cidade Exterior": estabelecimentos_cidade_exterior,
+                "País": estabelecimentos_pais,
+                "Data Início Atividade": estabelecimentos_data_de_inicio_de_atividade,
+                "CNAE Principal": estabelecimentos_cnae_principal,
+                "CNAE Secundário": estabelecimentos_cnae_secundario,
+                "Correio Eletrônico": estabelecimentos_correio_eletronico,
+                "Situação Especial": estabelecimentos_situacao_especial,
+                "Data Situação Especial": estabelecimentos_data_situacao_especial,
+                "CNPJ Completo": [formatar_cnpj(cnpj) for cnpj in estabelecimentos_cnpj],
+                "Endereço": estabelecimentos_endereco,
+                "Telefones": estabelecimentos_telefones
+            }
+        }
+
+        return jsonify(resultado_json)
+
+    return jsonify({"error": "Falha na conexão com o banco de dados"}), 500
+@app.route("/", methods=["GET", "POST"])  # Rota Principal
 def index():
     if request.method == "POST":
         cnpj = request.form.get("cnpj")
@@ -450,49 +542,60 @@ def index():
         coringa = request.form.get("coringa")
         conn = connect_to_db()  # Conectar ao banco de dados
         if conn:
-            cursor = conn.cursor()# Verificar qual pesquisa realizar com base nos dados fornecidos
+            cursor = conn.cursor()  # Verificar qual pesquisa realizar com base nos dados fornecidos
             if cnpj:
                 pesquisar_cnpj(cursor, cnpj)  # Realiza a pesquisa por CNPJ
             elif nome and cpf:
                 cpf_tratado = tratar_cpf(cpf)  # Tratamento do CPF antes da consulta
                 pesquisar_por_nome_e_cpf(cursor, nome, cpf_tratado)  # Realiza a pesquisa por Nome e CPF
             elif coringa:
-                pesquisar_coringa(cursor, coringa)   # Realiza a pesquisa coringa
+                pesquisar_coringa(cursor, coringa)  # Realiza a pesquisa coringa
+            
+            # Criar um dicionário para converter as variáveis em JSON
+            resultado_json = {
+                "sócios": {
+                    "CNPJ Raiz": socios_Cnpj_Raiz,
+                    "País": socios_pais,
+                    "Representante Legal": socios_repre_legal,
+                    "Nome Representante": socios_nome_repre,
+                    "Qualificação Representante": socios_quali_repre,
+                    "Sócios": socios_socios
+                },
+                "empresas": {
+                    "CNPJ Raiz": empresas_Cnpj_Raiz,
+                    "Nome": empresas_nome,
+                    "Capital Social": empresas_capital_social,
+                    "Ente Federativo": empresas_ente_federativo,
+                    "Qualificação Responsável": empresas_quali_responsavel,
+                    "Natureza Jurídica": empresas_natureza_juridica,
+                    "Porte": empresas_porte
+                },
+                "estabelecimentos": {
+                    "CNPJ Raiz": estabelecimentos_Cnpj_Raiz,
+                    "Identificador Matriz/Filial": estabelecimentos_identificador_matriz_filial,
+                    "Nome Fantasia": estabelecimentos_nome_fantasia,
+                    "Situação Cadastral": estabelecimentos_situacao_cadastral,
+                    "Data Situação Cadastral": estabelecimentos_data_situacao_cadastral,
+                    "Motivo Situação Cadastral": estabelecimentos_motivo_situacao_cadastral,
+                    "Cidade Exterior": estabelecimentos_cidade_exterior,
+                    "País": estabelecimentos_pais,
+                    "Data Início Atividade": estabelecimentos_data_de_inicio_de_atividade,
+                    "CNAE Principal": estabelecimentos_cnae_principal,
+                    "CNAE Secundário": estabelecimentos_cnae_secundario,
+                    "Correio Eletrônico": estabelecimentos_correio_eletronico,
+                    "Situação Especial": estabelecimentos_situacao_especial,
+                    "Data Situação Especial": estabelecimentos_data_situacao_especial,
+                    "CNPJ Completo": [formatar_cnpj(cnpj) for cnpj in estabelecimentos_cnpj],
+                    "Endereço": estabelecimentos_endereco,
+                    "Telefones": estabelecimentos_telefones
+                }
+            }
+            
+            # Exibir o resultado como JSON no console
+            print(json.dumps(resultado_json, indent=4, ensure_ascii=False))
+
     estabelecimentos_cnpj_formatado = [formatar_cnpj(cnpj) for cnpj in estabelecimentos_cnpj]  # Formatar CNPJ antes de enviar para o front-end
-        # Exibir os valores das variáveis no console
-    print("Sócios CNPJ Raiz:", socios_Cnpj_Raiz)  
-    print("Sócios País:", socios_pais)
-    print("Representante Legal:", socios_repre_legal)
-    print("Nome Representante:", socios_nome_repre)
-    print("Qualificação Representante:", socios_quali_repre)
-    print("Sócios:", socios_socios)
-
-    print("Empresas CNPJ Raiz:", empresas_Cnpj_Raiz)
-    print("Nome Empresas:", empresas_nome)    
-    print("Capital Social:", empresas_capital_social)
-    print("Ente Federativo:", empresas_ente_federativo)
-    print("Qualificação Responsável:", empresas_quali_responsavel)
-    print("Natureza Jurídica:", empresas_natureza_juridica)
-    print("Porte Empresas:", empresas_porte)
-
-    print("Estabelecimentos CNPJ Raiz:", estabelecimentos_Cnpj_Raiz)
-    print("Identificador Matriz/Filial:", estabelecimentos_identificador_matriz_filial)
-    print("Nome Fantasia:", estabelecimentos_nome_fantasia)
-    print("Situação Cadastral:", estabelecimentos_situacao_cadastral)
-    print("Data Situação Cadastral:", estabelecimentos_data_situacao_cadastral)
-    print("Motivo Situação Cadastral:", estabelecimentos_motivo_situacao_cadastral)
-    print("Cidade Exterior:", estabelecimentos_cidade_exterior)
-    print("País Estabelecimentos:", estabelecimentos_pais)
-    print("Data Início Atividade:", estabelecimentos_data_de_inicio_de_atividade)
-    print("CNAE Principal:", estabelecimentos_cnae_principal)
-    print("CNAE Secundário:", estabelecimentos_cnae_secundario)
-    print("Correio Eletrônico:", estabelecimentos_correio_eletronico)
-    print("Situação Especial:", estabelecimentos_situacao_especial)
-    print("Data Situação Especial:", estabelecimentos_data_situacao_especial)
-    print("CNPJ Completo (formatado):", estabelecimentos_cnpj_formatado)
-    print("Endereço:", estabelecimentos_endereco)
-    print("Telefones:", estabelecimentos_telefones)
-
+    
     return render_template(
         "index.html",  # Passar os dados formatados para o front-end
         socios_Cnpj_Raiz=socios_Cnpj_Raiz, socios_pais=socios_pais, socios_repre_legal=socios_repre_legal, socios_nome_repre=socios_nome_repre, 
