@@ -1,6 +1,6 @@
 /* Define a aparência geral do corpo da página */
 body {
-    font-family: 'Arial', sans-serif; /* Define a fonte principal */
+    font-family: 'Century Gothic', sans-serif; /* Define a fonte principal */
     background-color: #f4f4f4; /* Define a cor de fundo da página */
     color: #333; /* Define a cor do texto */
     margin: 0; /* Remove a margem padrão */
@@ -9,20 +9,45 @@ body {
 
 /* Estilos para o contêiner principal */
 .container {
-    width: 80%; /* Define a largura do contêiner como 80% da página */
-    max-width: 800px; /* Define a largura máxima do contêiner como 800px */
+    width: 90%; /* Define a largura do contêiner como 80% da página */
+    max-width: 900px; /* Define a largura máxima do contêiner como 800px */
     margin: 50px auto; /* Centraliza o contêiner na página e adiciona 50px de margem superior */
-    padding: 20px; /* Adiciona 20px de padding dentro do contêiner */
+    margin-top: 10px; /* Ajuste o valor conforme necessário */
+    padding: 10px; /* Adiciona 20px de padding dentro do contêiner */
     background-color: #fff; /* Define a cor de fundo do contêiner como branco */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra ao redor do contêiner */
     border-radius: 8px; /* Arredonda os cantos do contêiner */
+}
+
+/* Estilos para imagem */
+.header-image {/* Centraliza o contêiner da imagem dentro da página */
+    text-align: center; /* Alinha a imagem ao centro da página */
+    margin-bottom: 20px; /* Adiciona espaço abaixo da imagem para separá-la do conteúdo seguinte */
+}
+
+.top-logo {/* Define o estilo da imagem no topo da página */
+    max-width: 350px; /* Define a largura máxima da imagem em 200px. Isso evita que a imagem fique muito grande em telas pequenas. */
+    height: auto; /* Define a altura automaticamente para manter a proporção da imagem */
+}
+
+ /* Centraliza o contêiner do seletor */
+ .search-selection {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Oculta o título "Resultados" inicialmente */
+#results-title {
+    display: none;
 }
 
 /* Estilos para o título principal (h1) */
 h1 {
     text-align: center; /* Centraliza o texto */
     color: #444; /* Define a cor do texto */
-    margin-bottom: 30px; /* Adiciona 30px de margem inferior */
+    margin-bottom: 10px; /* Adiciona 10px de margem inferior */
+    font-size: 24px; /* Ajuste o tamanho conforme necessário */
 }
 
 /* Estilos para o formulário */
@@ -84,13 +109,14 @@ button {
 
 /* Estilos para o botão primário */
 .btn-primary {
-    background-color: #139e06; /* Define a cor de fundo como azul */
+    background-color: #aeb1ad; /* Define a cor de fundo como azul */
     color: white; /* Define a cor do texto como branco */
     width: 100%; /* Define a largura do botão como 100% do contêiner */
+    border: none; /* Remove a borda padrão */
 }
 
 button:hover {
-    background-color: #015f14;      /* Altera a cor de fundo do botão ao passar o mouse sobre ele (hover). */
+    background-color: #363636;      /* Altera a cor de fundo do botão ao passar o mouse sobre ele (hover). */
 }
 
 /* Define cor vermelha para status "Baixada" */
@@ -98,7 +124,10 @@ button:hover {
     color: red;
     font-weight: bold;
 }
-
+/* Define cor vermelha para status "Suspensa" */
+.status-orange {
+    color: orange;
+}
 /* Define cor verde para outros status */
 .status-green {
     color: rgb(8, 218, 8);

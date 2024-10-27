@@ -1,90 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"> <!-- Define o conjunto de caracteres para o documento como UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configura a visualização para dispositivos móveis -->
-    <title>Consulta de Dados</title> <!-- Título da página que aparece na aba do navegador -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> <!-- Link para a folha de estilo CSS -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Dados</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
 </head>
-<body>
-    <div class="container"> <!-- Div principal que contém todo o conteúdo da página -->
-        <h1>Consulta de Dados</h1> <!-- Título principal da página -->
+<body onload="resetPage()"> <!-- Adiciona a função resetPage ao carregar a página -->
+    <div class="container">
+        
+        <!-- Adicionando uma imagem no topo -->
+        <div class="header-image">
+            <img src="{{ url_for('static', filename='imagem/logo.png') }}" alt="Logo" class="top-logo">
+        </div>
 
-        <!-- Formulário de Pesquisa -->
-        <form method="POST" class="form-container"> <!-- Início do formulário com método POST -->
-            <div class="form-row"> <!-- Div para agrupar elementos do formulário -->
-                <div class="form-group"> <!-- Div para um grupo de controles de formulário -->
-                    <label for="cnpj">CNPJ</label> <!-- Rótulo para o campo de entrada CNPJ -->
-                    <input type="text" id="cnpj" name="cnpj" placeholder="Digite CNPJ"> <!-- Campo de entrada para CNPJ -->
+        <h1>Consulta de Dados</h1>
+
+        <!-- Menu de Seleção de Pesquisa Centralizado -->
+        <div class="search-selection">
+            <label for="search-type">Escolha o tipo de pesquisa:</label>
+            <select id="search-type" onchange="toggleSearchFields()">
+                <option value="">Selecione...</option>
+                <option value="cnpj">CNPJ</option>
+                <option value="nome-cpf">Nome e CPF</option>
+                <option value="coringa">Pesquisa Coringa</option>
+                <option value="unificar-excel">Unificar Arquivos Excel</option>
+            </select>
+        </div>
+
+        <!-- Formulário de Pesquisa por CNPJ -->
+        <form id="cnpj-form" method="POST" class="form-container" style="display: none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cnpj">CNPJ</label>
+                    <input type="text" id="cnpj" name="cnpj" placeholder="Digite CNPJ">
                 </div>
             </div>
-            <div class="form-row"> <!-- Outra linha do formulário -->
-                <div class="form-group"> <!-- Grupo para o campo Nome -->
-                    <label for="nome">Nome</label> <!-- Rótulo para o campo de entrada Nome -->
-                    <input type="text" id="nome" name="nome" placeholder="Digite Nome"> <!-- Campo de entrada para Nome -->
-                </div>
-                <div class="form-group"> <!-- Grupo para o campo CPF -->
-                    <label for="cpf">CPF</label> <!-- Rótulo para o campo de entrada CPF -->
-                    <input type="text" id="cpf" name="cpf" placeholder="Digite CPF"> <!-- Campo de entrada para CPF -->
-                </div>
-            </div>
-            <div class="form-row"> <!-- Outra linha do formulário -->
-                <div class="form-group"> <!-- Grupo para o campo Pesquisa Coringa -->
-                    <label for="coringa">Pesquisa Coringa</label> <!-- Rótulo para o campo de entrada Pesquisa Coringa -->
-                    <input type="text" id="coringa" name="coringa" placeholder="Digite Nome, Email ou Telefone"> <!-- Campo de entrada para Pesquisa Coringa -->
-                </div>
-            </div>
-            <div class="form-row"> <!-- Linha para o botão de busca -->
-                <button type="submit" class="btn-primary">Buscar</button> <!-- Botão de envio para buscar dados -->
+            <div class="form-row">
+                <button type="submit" class="btn-primary">Buscar</button>
             </div>
         </form>
 
-        <h2>Resultados</h2> <!-- Título para a seção de resultados -->
-        {% if estabelecimentos_cnpj %} <!-- Início de um bloco condicional: verifica se há resultados -->
-            <div class="form-row"> <!-- Linha para o botão de exportação -->
-                <form method="GET" action="{{ url_for('export_excel') }}"> <!-- Formulário para exportação, método GET -->
-                    <button type="submit" class="btn-primary">Exportar dados para Excel</button> <!-- Botão para exportar dados -->
+        <!-- Formulário de Pesquisa por Nome e CPF -->
+        <form id="nome-cpf-form" method="POST" class="form-container" style="display: none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" placeholder="Digite Nome">
+                </div>
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" name="cpf" placeholder="Digite CPF">
+                </div>
+            </div>
+            <div class="form-row">
+                <button type="submit" class="btn-primary">Buscar</button>
+            </div>
+        </form>
+
+        <!-- Formulário de Pesquisa Coringa -->
+        <form id="coringa-form" method="POST" class="form-container" style="display: none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="coringa">Pesquisa Coringa - Empresário individual</label>
+                    <input type="text" id="coringa" name="coringa" placeholder="Digite Nome, Email ou Telefone">
+                </div>
+            </div>
+            <div class="form-row">
+                <button type="submit" class="btn-primary">Buscar</button>
+            </div>
+        </form>
+
+        <!-- Formulário para Unificação de Arquivos Excel -->
+        <form id="unificar-excel-form" method="POST" enctype="multipart/form-data" action="{{ url_for('process_excel_route') }}" style="display: none;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="excel-files">Selecione os arquivos Excel para unificação:</label>
+                    <input type="file" id="excel-files" name="excel_files" multiple webkitdirectory accept=".xlsx, .xls">
+                </div>
+            </div>
+            <div class="form-row">
+                <button type="submit" class="btn-primary">Unificar Escrituras e Procurações</button>
+            </div>
+        </form>
+
+        <!-- Título de Resultados, inicialmente oculto -->
+        <h2 id="results-title">Resultados</h2>
+
+        <!-- Resultados -->
+        {% if estabelecimentos_cnpj %}
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    document.getElementById("results-title").style.display = "block";
+                });
+            </script>
+
+            <!-- Abas para cada CNPJ Raiz -->
+            <div class="tab">
+                {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
+                    <button class="tablink" onclick="openTab(event, 'tab{{ raiz }}')">
+                        {{ raiz }}
+                    </button>
+                {% endfor %}
+            </div>
+            
+            <div class="form-row">
+                <form method="GET" action="{{ url_for('export_excel') }}">
+                    <button type="submit" class="btn-primary">Exportar dados para Excel</button>
                 </form>
             </div>
-            {% for index in range(estabelecimentos_cnpj|length) %} <!-- Início de um loop: itera sobre os resultados -->
-            <div class="result-block"> <!-- Bloco para exibir os resultados -->
-                <h3>{{ empresas_nome[index] }}</h3> <!-- Nome da empresa -->
-                <p><strong>CNPJ:</strong> {{ estabelecimentos_cnpj[index] }}</p> <!-- CNPJ da empresa -->
-                <p><strong>Nome:</strong> {{ empresas_nome[index] }}</p> <!-- Nome da empresa (repetido) -->
-                <p><strong>Constituição:</strong> {{ estabelecimentos_data_de_inicio_de_atividade[index] }}</p> <!-- Data de início da atividade -->
-                <p><strong>Filial ou Matriz:</strong> {{ estabelecimentos_identificador_matriz_filial[index] }}</p> <!-- Indicação de filial ou matriz -->
-                <p><strong>Endereço:</strong> {{ estabelecimentos_endereco[index] }}</p> <!-- Endereço da empresa -->
-                <p><strong>Status:</strong>
-                   <span class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red{% else %}status-green{% endif %}"> <!-- Verifica o status cadastral e aplica classe CSS correspondente -->
-                       {{ estabelecimentos_situacao_cadastral[index] }} <!-- Exibe o status cadastral -->
-                   </span>
-                </p>
-                <p><strong>Data Status:</strong> {{ estabelecimentos_data_situacao_cadastral[index] }}</p> <!-- Data do status cadastral -->
-                <p><strong>Motivo Status:</strong> {{ estabelecimentos_motivo_situacao_cadastral[index] }}</p> <!-- Motivo do status cadastral -->
-                <p><strong>QSA:</strong> {{ socios_socios[index] }}</p> <!-- QSA dos sócios -->
-                <p><strong>Representante:</strong> {{ socios_repre_legal[index] }}</p> <!-- Representante legal -->
-                <p><strong>Nome Representante:</strong> {{ socios_nome_repre[index] }}</p> <!-- Nome do representante -->
-                <p><strong>Qualificação Representante:</strong> {{ socios_quali_repre[index] }}</p> <!-- Qualificação do representante -->
-                <p><strong>País:</strong> {{ socios_pais[index] }}</p> <!-- País dos sócios -->
-                <p><strong>Capital Social:</strong> {{ empresas_capital_social[index] }}</p> <!-- Capital social da empresa -->
-                <p><strong>Ente Federativo:</strong> {{ empresas_ente_federativo[index] }}</p> <!-- Ente federativo da empresa -->
-                <p><strong>Qualificação Responsável:</strong> {{ empresas_quali_responsavel[index] }}</p> <!-- Qualificação do responsável pela empresa -->
-                <p><strong>Natureza Jurídica:</strong> {{ empresas_natureza_juridica[index] }}</p> <!-- Natureza jurídica da empresa -->
-                <p><strong>Porte:</strong> {{ empresas_porte[index] }}</p> <!-- Porte da empresa -->
-                <p><strong>Nome Fantasia:</strong> {{ estabelecimentos_nome_fantasia[index] }}</p> <!-- Nome fantasia da empresa -->
-                <p><strong>Cidade Exterior:</strong> {{ estabelecimentos_cidade_exterior[index] }}</p> <!-- Cidade exterior -->
-                <p><strong>País:</strong> {{ estabelecimentos_pais[index] }}</p> <!-- País da empresa -->
-                <p><strong>CNAE Principal:</strong> {{ estabelecimentos_cnae_principal[index] }}</p> <!-- CNAE principal da empresa -->
-                <p><strong>CNAE Secundário:</strong> {{ estabelecimentos_cnae_secundario[index] }}</p> <!-- CNAE secundário da empresa -->
-                <p><strong>Telefones:</strong> {{ estabelecimentos_telefones[index] }}</p> <!-- Telefones da empresa -->
-                <p><strong>Email:</strong> {{ estabelecimentos_correio_eletronico[index] }}</p> <!-- E-mail da empresa -->
-                <p><strong>Situação Especial:</strong> {{ estabelecimentos_situacao_especial[index] }}</p> <!-- Situação especial da empresa -->
-                <p><strong>Data da Situação Especial:</strong> {{ estabelecimentos_data_situacao_especial[index] }}</p> <!-- Data da situação especial -->
+
+            <!-- Conteúdo das abas para cada CNPJ Raiz -->
+            {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
+            <div id="tab{{ raiz }}" class="tab-content">
+                {% for index in range(estabelecimentos_cnpj|length) %}
+                    {% if estabelecimentos_Cnpj_Raiz[index] == raiz %}
+                        <div class="result-block">
+                            <h3>{{ empresas_nome[index] }}</h3>
+                            <p><strong>CNPJ:</strong> {{ estabelecimentos_cnpj[index] }}</p>
+                            <p><strong>Nome:</strong> {{ empresas_nome[index] }}</p>
+                            <p><strong>Constituição:</strong> {{ estabelecimentos_data_de_inicio_de_atividade[index] }}</p>
+                            <p><strong>Filial ou Matriz:</strong> {{ estabelecimentos_identificador_matriz_filial[index] }}</p>
+                            <p><strong>Endereço:</strong> {{ estabelecimentos_endereco[index] }}</p>
+                            <p><strong>Status:</strong>
+                                <span class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red
+                                             {% elif estabelecimentos_situacao_cadastral[index] in ['Inapta', 'Suspensa'] %}status-orange
+                                             {% else %}status-green{% endif %}">
+                                    {{ estabelecimentos_situacao_cadastral[index] }}
+                                </span>
+                            </p>
+                            
+                            </p>
+                            <p><strong>Data Status:</strong> {{ estabelecimentos_data_situacao_cadastral[index] }}</p>
+                            <p><strong>Motivo Status:</strong> {{ estabelecimentos_motivo_situacao_cadastral[index] }}</p>
+                            <p><strong>QSA:</strong> {{ socios_socios[index] }}</p>
+                            <p><strong>Representante:</strong> {{ socios_repre_legal[index] }}</p>
+                            <p><strong>Nome Representante:</strong> {{ socios_nome_repre[index] }}</p>
+                            <p><strong>Qualificação Representante:</strong> {{ socios_quali_repre[index] }}</p>
+                            <p><strong>País:</strong> {{ socios_pais[index] }}</p>
+                            <p><strong>Capital Social:</strong> {{ empresas_capital_social[index] }}</p>
+                            <p><strong>Ente Federativo:</strong> {{ empresas_ente_federativo[index] }}</p>
+                            <p><strong>Qualificação Responsável:</strong> {{ empresas_quali_responsavel[index] }}</p>
+                            <p><strong>Natureza Jurídica:</strong> {{ empresas_natureza_juridica[index] }}</p>
+                            <p><strong>Porte:</strong> {{ empresas_porte[index] }}</p>
+                            <p><strong>Nome Fantasia:</strong> {{ estabelecimentos_nome_fantasia[index] }}</p>
+                            <p><strong>Cidade Exterior:</strong> {{ estabelecimentos_cidade_exterior[index] }}</p>
+                            <p><strong>País:</strong> {{ estabelecimentos_pais[index] }}</p>
+                            <p><strong>CNAE Principal:</strong> {{ estabelecimentos_cnae_principal[index] }}</p>
+                            <p><strong>CNAE Secundário:</strong> {{ estabelecimentos_cnae_secundario[index] }}</p>
+                            <p><strong>Telefones:</strong> {{ estabelecimentos_telefones[index] }}</p>
+                            <p><strong>Email:</strong> {{ estabelecimentos_correio_eletronico[index] }}</p>
+                            <p><strong>Situação Especial:</strong> {{ estabelecimentos_situacao_especial[index] }}</p>
+                            <p><strong>Data da Situação Especial:</strong> {{ estabelecimentos_data_situacao_especial[index] }}</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %} <!-- Fim do loop -->
-        {% else %} <!-- Caso não haja resultados -->
-            <p>Nenhum resultado encontrado.</p> <!-- Mensagem para informar que não há resultados -->
-        {% endif %} <!-- Fim do bloco condicional -->
+            {% endfor %}
+        {% else %}
+        {% endif %}
     </div>
+
+    <!-- JavaScript para controle das abas e campos de pesquisa -->
+    <script>
+        // Função para resetar a página ao carregar
+        function resetPage() {
+            // Restaura o seletor ao estado inicial
+            document.getElementById("search-type").value = ""; 
+            
+            // Oculta todos os campos de pesquisa
+            toggleSearchFields(); 
+            
+            // Oculta o título "Resultados" até que uma pesquisa seja feita
+            document.getElementById("results-title").style.display = "none"; 
+        }
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        document.getElementsByClassName("tablink")[0]?.click();
+
+        // Função para exibir campos de pesquisa conforme o tipo selecionado
+        function toggleSearchFields() {
+            const searchType = document.getElementById("search-type").value;
+            document.getElementById("cnpj-form").style.display = "none";
+            document.getElementById("nome-cpf-form").style.display = "none";
+            document.getElementById("coringa-form").style.display = "none";
+            document.getElementById("unificar-excel-form").style.display = "none";
+
+            if (searchType === "cnpj") {
+                document.getElementById("cnpj-form").style.display = "block";
+            } else if (searchType === "nome-cpf") {
+                document.getElementById("nome-cpf-form").style.display = "block";
+            } else if (searchType === "coringa") {
+                document.getElementById("coringa-form").style.display = "block";
+            } else if (searchType === "unificar-excel") {
+                document.getElementById("unificar-excel-form").style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>
