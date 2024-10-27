@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+=======
+from flask import Flask, render_template, request, jsonify, send_file
+>>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
 from flasgger import Swagger
 import psycopg2
 import pandas as pd
 import io
 import xlsxwriter
 import json
+<<<<<<< HEAD
 import os
 import tkinter as tk
 from tkinter import filedialog
@@ -13,6 +18,11 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 swagger = Swagger(app)
 app.secret_key = 'your_secret_key'  # Substitua por uma chave segura
+=======
+
+app = Flask(__name__)
+swagger = Swagger(app)
+>>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
 # Configurações do banco de dados
 DB_HOST = "postgresql-171633-0.cloudclusters.net"
 DB_PORT = "18857"
@@ -381,6 +391,7 @@ def criar_dataframe():# Função para criar DataFrames com os dados globais cole
     df_estabelecimentos = pd.DataFrame(estabelecimentos_data)
     # Retornar os DataFrames
     return df_socios, df_empresas, df_estabelecimentos
+<<<<<<< HEAD
 
 @app.route('/process_excel', methods=['POST'])
 def process_excel_route():
@@ -439,6 +450,9 @@ def process_excel_route():
 
     return send_file(output, download_name="Unificado.xlsx", as_attachment=True)
 @app.route('/export_excel')##Rota para exportar para Excel dos resultados
+=======
+@app.route('/export_excel')##Rota para exportar para Excel
+>>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
 def export_excel():
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output, {'in_memory': True})
