@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Dados</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-<<<<<<< HEAD
-=======
-    
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
 </head>
 <body onload="resetPage()">
     <div class="container">
@@ -33,11 +29,7 @@
         </div>
 
         <!-- Formulário de Pesquisa por CNPJ -->
-<<<<<<< HEAD
         <form id="cnpj-form" method="POST" action="{{ url_for('cnpj') }}" class="form-container" style="display: none;">
-=======
-        <form id="cnpj-form" method="POST" class="form-container" style="display: none;">
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
             <div class="form-row">
                 <div class="form-group">
                     <label for="cnpj">CNPJ</label>
@@ -168,10 +160,6 @@
                 {% endfor %}
             </div>
             {% endfor %}
-<<<<<<< HEAD
-=======
-        {% else %}
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
         {% endif %}
     </div>
 
@@ -189,29 +177,17 @@
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "none";
             }
-<<<<<<< HEAD
-=======
-
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
             tablinks = document.getElementsByClassName("tablink");
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-<<<<<<< HEAD
-=======
-
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
         }
 
-<<<<<<< HEAD
         if (document.getElementsByClassName("tablink")[0]) {
             document.getElementsByClassName("tablink")[0].click();
         }
-=======
-        document.getElementsByClassName("tablink")[0]?.click();
->>>>>>> 6656bee9bb0590781bacfed96d2c77bf68e86ca5
 
         function toggleSearchFields() {
             const searchType = document.getElementById("search-type").value;
