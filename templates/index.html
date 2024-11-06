@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Dados</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-<<<<<<< HEAD
-    
 </head>
-<body onload="resetPage()"> <!-- Adiciona a função resetPage ao carregar a página -->
+<body onload="resetPage()">
     <div class="container">
         
         <!-- Adicionando uma imagem no topo -->
         <div class="header-image">
             <img src="{{ url_for('static', filename='imagem/logo.png') }}" alt="Logo" class="top-logo">
         </div>
-
-        <h1>Consulta de Dados</h1>
+        
+        <h1>Consultas</h1>
 
         <!-- Menu de Seleção de Pesquisa Centralizado -->
         <div class="search-selection">
@@ -31,16 +29,7 @@
         </div>
 
         <!-- Formulário de Pesquisa por CNPJ -->
-        <form id="cnpj-form" method="POST" class="form-container" style="display: none;">
-=======
-</head>
-<body>
-    <div class="container">
-        <h1>Consulta de Dados</h1>
-
-        <!-- Formulário de Pesquisa -->
-        <form method="POST" class="form-container">
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
+        <form id="cnpj-form" method="POST" action="{{ url_for('cnpj') }}" class="form-container" style="display: none;">
             <div class="form-row">
                 <div class="form-group">
                     <label for="cnpj">CNPJ</label>
@@ -48,32 +37,12 @@
                 </div>
             </div>
             <div class="form-row">
-<<<<<<< HEAD
-=======
-                <div class="form-group">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" placeholder="Digite Nome">
-                </div>
-                <div class="form-group">
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" name="cpf" placeholder="Digite CPF">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="coringa">Pesquisa Coringa - Empresario individual</label>
-                    <input type="text" id="coringa" name="coringa" placeholder="Digite Nome, Email ou Telefone">
-                </div>
-            </div>
-            <div class="form-row">
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
                 <button type="submit" class="btn-primary">Buscar</button>
             </div>
         </form>
 
-<<<<<<< HEAD
         <!-- Formulário de Pesquisa por Nome e CPF -->
-        <form id="nome-cpf-form" method="POST" class="form-container" style="display: none;">
+        <form id="nome-cpf-form" method="POST" action="{{ url_for('nome_cpf') }}" class="form-container" style="display: none;">
             <div class="form-row">
                 <div class="form-group">
                     <label for="nome">Nome</label>
@@ -90,7 +59,7 @@
         </form>
 
         <!-- Formulário de Pesquisa Coringa -->
-        <form id="coringa-form" method="POST" class="form-container" style="display: none;">
+        <form id="coringa-form" method="POST" action="{{ url_for('coringa') }}" class="form-container" style="display: none;">
             <div class="form-row">
                 <div class="form-group">
                     <label for="coringa">Pesquisa Coringa - Empresário individual</label>
@@ -103,11 +72,11 @@
         </form>
 
         <!-- Formulário para Unificação de Arquivos Excel -->
-        <form id="unificar-excel-form" method="POST" enctype="multipart/form-data" action="{{ url_for('process_excel_route') }}" style="display: none;">
+        <form id="unificar-excel-form" method="POST" enctype="multipart/form-data" action="{{ url_for('process_excel') }}" style="display: none;">
             <div class="form-row">
                 <div class="form-group">
                     <label for="excel-files">Selecione os arquivos Excel para unificação:</label>
-                    <input type="file" id="excel-files" name="excel_files" multiple webkitdirectory accept=".xlsx, .xls">
+                    <input type="file" id="excel-files" name="excel_files" multiple accept=".xlsx, .xls">
                 </div>
             </div>
             <div class="form-row">
@@ -116,7 +85,7 @@
         </form>
 
         <!-- Título de Resultados, inicialmente oculto -->
-        <h2 id="results-title">Resultados</h2>
+        <h2 id="results-title" style="display: none;">Resultados</h2>
 
         <!-- Resultados -->
         {% if estabelecimentos_cnpj %}
@@ -126,38 +95,21 @@
                 });
             </script>
 
-=======
-        <h2>Resultados</h2>
-
-        {% if estabelecimentos_cnpj %}
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
             <!-- Abas para cada CNPJ Raiz -->
             <div class="tab">
                 {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
                     <button class="tablink" onclick="openTab(event, 'tab{{ raiz }}')">
-<<<<<<< HEAD
                         {{ raiz }}
-=======
-                        {{ raiz }} <!-- Exibe o próprio CNPJ Raiz na guia -->
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
                     </button>
                 {% endfor %}
             </div>
             
-<<<<<<< HEAD
             <div class="form-row">
                 <form method="GET" action="{{ url_for('export_excel') }}">
                     <button type="submit" class="btn-primary">Exportar dados para Excel</button>
                 </form>
             </div>
 
-=======
-            <div class="form-row"> <!-- Linha para o botão de exportação -->
-                <form method="GET" action="{{ url_for('export_excel') }}"> <!-- Formulário para exportação, método GET -->
-                    <button type="submit" class="btn-primary">Exportar dados para Excel</button> <!-- Botão para exportar dados -->
-                </form>
-            </div>
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
             <!-- Conteúdo das abas para cada CNPJ Raiz -->
             {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
             <div id="tab{{ raiz }}" class="tab-content">
@@ -177,11 +129,14 @@
                                     {{ estabelecimentos_situacao_cadastral[index] }}
                                 </span>
                             </p>
-                            
-                            </p>
                             <p><strong>Data Status:</strong> {{ estabelecimentos_data_situacao_cadastral[index] }}</p>
                             <p><strong>Motivo Status:</strong> {{ estabelecimentos_motivo_situacao_cadastral[index] }}</p>
-                            <p><strong>QSA:</strong> {{ socios_socios[index] }}</p>
+                            <p><strong>QSA:</strong></p>
+                                                    <p>
+                                                        {% for qsa_item in (socios_socios[index] or '').split('\n') %}
+                                                            {{ qsa_item }}<br>
+                                                        {% endfor %}
+                                                    </p>
                             <p><strong>Representante:</strong> {{ socios_repre_legal[index] }}</p>
                             <p><strong>Nome Representante:</strong> {{ socios_nome_repre[index] }}</p>
                             <p><strong>Qualificação Representante:</strong> {{ socios_quali_repre[index] }}</p>
@@ -205,65 +160,35 @@
                 {% endfor %}
             </div>
             {% endfor %}
-<<<<<<< HEAD
-        {% else %}
         {% endif %}
     </div>
 
     <!-- JavaScript para controle das abas e campos de pesquisa -->
     <script>
-        // Função para resetar a página ao carregar
         function resetPage() {
-            // Restaura o seletor ao estado inicial
             document.getElementById("search-type").value = ""; 
-            
-            // Oculta todos os campos de pesquisa
             toggleSearchFields(); 
-            
-            // Oculta o título "Resultados" até que uma pesquisa seja feita
             document.getElementById("results-title").style.display = "none"; 
         }
 
         function openTab(evt, tabName) {
-=======
-
-        {% else %}
-            <p>Nenhum resultado encontrado.</p>
-        {% endif %}
-    </div>
-
-    <!-- JavaScript para controle das abas -->
-    <script>
-        function openTab(evt, tabName) {
-            // Esconder todas as abas
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "none";
             }
-
-<<<<<<< HEAD
-=======
-            // Remover a classe "active" de todos os botões
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
             tablinks = document.getElementsByClassName("tablink");
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-
-<<<<<<< HEAD
-=======
-            // Exibir a aba selecionada
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
         }
 
-<<<<<<< HEAD
-        document.getElementsByClassName("tablink")[0]?.click();
+        if (document.getElementsByClassName("tablink")[0]) {
+            document.getElementsByClassName("tablink")[0].click();
+        }
 
-        // Função para exibir campos de pesquisa conforme o tipo selecionado
         function toggleSearchFields() {
             const searchType = document.getElementById("search-type").value;
             document.getElementById("cnpj-form").style.display = "none";
@@ -281,10 +206,6 @@
                 document.getElementById("unificar-excel-form").style.display = "block";
             }
         }
-=======
-        // Por padrão, abrir a primeira aba
-        document.getElementsByClassName("tablink")[0].click();
->>>>>>> c825e17c82c6825166304662a480cbd85ad8790d
     </script>
 </body>
 </html>
