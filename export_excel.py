@@ -54,7 +54,10 @@ def export_excel():
     for i in range(len(config.estabelecimentos_Cnpj_Raiz)):  # Iterar sobre os estabelecimentos
         worksheet.write(row, 0, config.estabelecimentos_identificador_matriz_filial[i])  # Identificador Matriz/Filial
         worksheet.write(row, 1, config.empresas_nome[i] if i < len(config.empresas_nome) else '')  # Nome da Empresa
-        worksheet.write(row, 2, config.formatar_cnpj(config.estabelecimentos_cnpj[i]))  # CNPJ Completo
+        # Corrigir o formato do CNPJ
+        cnpj = config.estabelecimentos_cnpj[i]
+        cnpj_formatado = f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}" if len(cnpj) == 14 else cnpj
+        worksheet.write(row, 2, cnpj_formatado)  # CNPJ Completo
         worksheet.write(row, 3, config.estabelecimentos_endereco[i])  # Endereço
         worksheet.write(row, 4, config.socios_socios[i] if i < len(config.socios_socios) else '')  # Sócios
         worksheet.write(row, 5, config.estabelecimentos_data_de_inicio_de_atividade[i])  # Data de Início de Atividade

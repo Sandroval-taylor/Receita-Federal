@@ -14,7 +14,12 @@
             <img src="{{ url_for('static', filename='imagem/logo.png') }}" alt="Logo" class="top-logo">
         </div>
         
-        <h1>Consultas</h1>
+        <h1>Consulta de Dados</h1>
+
+        <!-- Imagem de carregamento centralizada -->
+        <div id="loading-image" class="loading-container" style="display: none;">
+            <img src="{{ url_for('static', filename='imagem/pesquisa.gif') }}" alt="Carregando..." class="loading-icon">
+        </div>
 
         <!-- Menu de Seleção de Pesquisa Centralizado -->
         <div class="search-selection">
@@ -41,16 +46,16 @@
             </div>
         </form>
 
-        <!-- Formulário de Pesquisa por Nome e CPF -->
+       <!-- Formulário de Pesquisa por Nome e CPF -->
         <form id="nome-cpf-form" method="POST" action="{{ url_for('nome_cpf') }}" class="form-container" style="display: none;">
             <div class="form-row">
                 <div class="form-group">
                     <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" placeholder="Digite Nome">
+                    <input type="text" id="nome" name="nome" placeholder="Digite Nome" required>
                 </div>
                 <div class="form-group">
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" name="cpf" placeholder="Digite CPF">
+                    <label for="identificador">CPF/CNPJ</label>
+                    <input type="text" id="identificador" name="identificador" placeholder="Digite CPF/CNPJ" required>
                 </div>
             </div>
             <div class="form-row">
@@ -92,6 +97,7 @@
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     document.getElementById("results-title").style.display = "block";
+                    document.getElementById("loading-image").style.display = "none"; // Oculta a imagem de carregamento
                 });
             </script>
 
@@ -163,14 +169,40 @@
         {% endif %}
     </div>
 
-    <!-- JavaScript para controle das abas e campos de pesquisa -->
     <script>
         function resetPage() {
             document.getElementById("search-type").value = ""; 
             toggleSearchFields(); 
             document.getElementById("results-title").style.display = "none"; 
+            document.getElementById("loading-image").style.display = "none"; // Oculta a imagem de carregamento ao carregar a página
         }
+        
+        // Mostra o GIF de carregamento ao enviar qualquer formulário de pesquisa
+        document.addEventListener("submit", function(event) {
+            document.getElementById("loading-image").style.display = "flex";
+        });
 
+        // Oculta o GIF de carregamento após o carregamento da página com novos resultados
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("loading-image").style.display = "none"; // Esconde o GIF ao completar o carregamento inicial
+        });
+
+        // Esconde o GIF após o término da exportação e unificação usando um truque com tempo (melhorar com backend seria ideal)
+        function hideLoadingImage() {
+            document.getElementById("loading-image").style.display = "none";
+        }
+        
+        // Eventos para monitorar quando o Excel é exportado ou unificado
+        document.querySelector("form[action*='export_excel']").onsubmit = function() {
+            document.getElementById("loading-image").style.display = "flex";
+            setTimeout(hideLoadingImage, 3000);  // Ajuste o tempo conforme necessário
+        };
+
+        document.querySelector("form[action*='process_excel']").onsubmit = function() {
+            document.getElementById("loading-image").style.display = "flex";
+            setTimeout(hideLoadingImage, 3000);  // Ajuste o tempo conforme necessário
+        };
+        
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
@@ -183,10 +215,6 @@
             }
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
-        }
-
-        if (document.getElementsByClassName("tablink")[0]) {
-            document.getElementsByClassName("tablink")[0].click();
         }
 
         function toggleSearchFields() {

@@ -30,37 +30,63 @@ def process_excel():
       400:
         description: "Erro: Nenhum arquivo válido encontrado ou estrutura inválida"
     """
-    # Implementação da função process_excel
+    # Verifica se arquivos foram carregados
     if 'excel_files' not in request.files:
         return jsonify({"message": "Nenhum arquivo foi selecionado."}), 400
     df_list = []
     for file in request.files.getlist('excel_files'):
         filename = secure_filename(file.filename)
         if filename.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file, header=None)
-            df = df.iloc[6:]  # Exclui as 6 primeiras linhas
+            # Lê o arquivo e ignora as 6 primeiras linhas; a linha 6 será o cabeçalho
+            df = pd.read_excel(file, header=6)
+            # Remove espaços extras nos nomes das colunas
+            df.columns = df.columns.str.strip()
             df_list.append(df)
     if not df_list:
         return jsonify({"message": "Nenhum arquivo válido encontrado."}), 400
-    
+    # Concatena os arquivos em um único DataFrame
     df = pd.concat(df_list, ignore_index=True)
-    if df.shape[1] > 8:# Unifica as colunas 6, 7 e 8, separando os valores com "-"
-        df[6] = df.apply(lambda row: ' - '.join([str(row.iloc[6]), str(row.iloc[7]), str(row.iloc[8])]), axis=1)
-        df.drop(columns=[5, 7, 8], inplace=True)
+    print("Colunas após concatenação:", df.columns.tolist())
+    # Define o nome das colunas desejadas para garantir que elas estejam presentes
+    colunas_desejadas = [
+        'Partes', 'Cpf/Cnpj', 'Qualidade', 'Ato', 'Natureza do Ato', 
+        'Data do Ato', 'Livro', 'Folha', 'Cartório', 'Comarca', 'UF'
+    ]
+    colunas_faltantes = [coluna for coluna in colunas_desejadas if coluna not in df.columns]
+    if colunas_faltantes:
+        print(f"Colunas faltantes: {colunas_faltantes}")
+        return jsonify({"message": "Estrutura de dados inválida."}), 400
     else:
-        return jsonify({"message": "Estrutura do arquivo inválida."}), 400
-    def unificar_linhas(group):# Define a função para unificar as linhas agrupadas
-        return ' \n '.join(group.astype(str))
-    condicao = df[3].duplicated(keep=False) & df[4].duplicated(keep=False)# Condição para detectar duplicidade nas colunas 3 e 4
-    df[6] = df.groupby([3, 4])[6].transform(lambda x: unificar_linhas(x) if condicao.any() else '')
-    df.drop_duplicates(subset=[3, 4], keep='first', inplace=True)# Remove as linhas duplicadas com base nas colunas 3 e 4
-    coluna_6 = df.pop(6)
-    df.insert(0, 6, coluna_6)# Move a coluna 6 para a primeira posição
-    df[6] = df[6].apply(lambda x: ' \n '.join(pd.Series(str(x).split(' \n ')).unique()) if pd.notnull(x) else '')# Remove valores duplicados em cada célula da primeira coluna
-    df[3] = pd.to_datetime(df[3], errors='coerce')# Converte a coluna 3 para o tipo de dados datetime
-    df = df.sort_values(by=[3], ascending=False)# Ordena o DataFrame com base na coluna 3 em ordem decrescente
-    output = io.BytesIO()# Salva o DataFrame resultante em um arquivo temporário para download
+        print("Todas as colunas esperadas estão presentes.")
+    # Unificação das colunas Partes, Cpf/Cnpj e Qualidade em uma única coluna "Partes - Cpf/Cnpj - Qualidade"
+    df['Partes - Cpf/Cnpj - Qualidade'] = df.apply(lambda row: f"{row.get('Partes', '')} - {row.get('Cpf/Cnpj', '')} / {row.get('Qualidade', '')}", axis=1)
+    print("Colunas após unificação (nova coluna 'Partes - Cpf/Cnpj - Qualidade' adicionada):", df.columns.tolist())
+    # Remove as colunas antigas que foram unificadas
+    df.drop(columns=['Partes', 'Cpf/Cnpj', 'Qualidade'], inplace=True, errors='ignore')
+    print("Colunas após exclusão de 'Partes', 'Cpf/Cnpj' e 'Qualidade':", df.columns.tolist())
+    # Reordena as colunas conforme a especificação final, garantindo que todas as colunas estejam presentes
+    colunas_final = [
+        'Partes - Cpf/Cnpj - Qualidade', 'Ato', 'Natureza do Ato', 'Data do Ato',
+        'Livro', 'Folha', 'Cartório', 'Comarca', 'UF'
+    ]
+    for coluna in colunas_final:
+        if coluna not in df.columns:
+            df[coluna] = ''  # Adiciona a coluna vazia se estiver ausente
+    df = df[colunas_final]
+    print("Colunas após reordenação final:", df.columns.tolist())
+    # Unificação de linhas duplicadas com base nas colunas 'Livro' e 'Folha' usando concatenação de valores únicos
+    def unificar_linhas(series):
+        return ' \n '.join(series.dropna().astype(str).unique())
+    for coluna in ['Partes - Cpf/Cnpj - Qualidade', 'Ato', 'Natureza do Ato', 'Data do Ato', 'Cartório', 'Comarca']:
+        if coluna in df.columns:
+            df[coluna] = df.groupby(['Livro', 'Folha'])[coluna].transform(unificar_linhas)
+    print("Colunas após unificação de linhas duplicadas:", df.columns.tolist())
+    # Remoção de duplicatas com base nas colunas 'Livro' e 'Folha'
+    df.drop_duplicates(subset=['Livro', 'Folha'], inplace=True)
+    print("Colunas após remoção de duplicatas:", df.columns.tolist())
+    # Salva o DataFrame resultante em um arquivo temporário para download
+    output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, header=False)
+        df.to_excel(writer, index=False, header=True)
     output.seek(0)
     return send_file(output, download_name="Unificado.xlsx", as_attachment=True)
