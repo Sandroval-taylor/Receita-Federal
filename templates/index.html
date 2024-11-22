@@ -1,239 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Consulta de Dados</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body onload="resetPage()">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+  </head>
+  <body onload="resetPage()">
     <div class="container">
-        
-        <!-- Adicionando uma imagem no topo -->
-        <div class="header-image">
-            <img src="{{ url_for('static', filename='imagem/logo.png') }}" alt="Logo" class="top-logo">
+      <!-- Adicionando uma imagem no topo -->
+      <div class="header-image">
+        <img
+          src="{{ url_for('static', filename='imagem/logo.png') }}"
+          alt="Logo"
+          class="top-logo"
+        />
+      </div>
+
+      <h1>Consulta de Dados</h1>
+
+      <!-- Imagem de carregamento centralizada -->
+      <div id="loading-image" class="loading-container" style="display: none">
+        <img
+          src="{{ url_for('static', filename='imagem/pesquisa.gif') }}"
+          alt="Carregando..."
+          class="loading-icon"
+        />
+      </div>
+
+      <!-- Menu de Seleção de Pesquisa Centralizado -->
+      <div class="search-selection">
+        <label for="search-type">Escolha o tipo de pesquisa:</label>
+        <select id="search-type" onchange="toggleSearchFields()">
+          <option value="">Selecione...</option>
+          <option value="cnpj">CNPJ</option>
+          <option value="nome-cpf">Nome e CPF</option>
+          <option value="coringa">Pesquisa Coringa</option>
+          <option value="unificar-excel">Unificar Arquivos Excel</option>
+        </select>
+      </div>
+
+      <!-- Formulário de Pesquisa por CNPJ -->
+      <form
+        id="cnpj-form"
+        method="POST"
+        action="{{ url_for('cnpj') }}"
+        class="form-container"
+        style="display: none"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cnpj">CNPJ</label>
+            <input
+              type="text"
+              id="cnpj"
+              name="cnpj"
+              placeholder="Digite CNPJ"
+            />
+          </div>
         </div>
-        
-        <h1>Consulta de Dados</h1>
-
-        <!-- Imagem de carregamento centralizada -->
-        <div id="loading-image" class="loading-container" style="display: none;">
-            <img src="{{ url_for('static', filename='imagem/pesquisa.gif') }}" alt="Carregando..." class="loading-icon">
+        <div class="form-row">
+          <button type="submit" class="btn-primary">Buscar</button>
         </div>
+      </form>
 
-        <!-- Menu de Seleção de Pesquisa Centralizado -->
-        <div class="search-selection">
-            <label for="search-type">Escolha o tipo de pesquisa:</label>
-            <select id="search-type" onchange="toggleSearchFields()">
-                <option value="">Selecione...</option>
-                <option value="cnpj">CNPJ</option>
-                <option value="nome-cpf">Nome e CPF</option>
-                <option value="coringa">Pesquisa Coringa</option>
-                <option value="unificar-excel">Unificar Arquivos Excel</option>
-            </select>
+      <!-- Formulário de Pesquisa por Nome e CPF -->
+      <form
+        id="nome-cpf-form"
+        method="POST"
+        action="{{ url_for('nome_cpf') }}"
+        class="form-container"
+        style="display: none"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nome">Nome</label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              placeholder="Digite Nome"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="identificador">CPF/CNPJ</label>
+            <input
+              type="text"
+              id="identificador"
+              name="identificador"
+              placeholder="Digite CPF/CNPJ"
+              required
+            />
+          </div>
         </div>
+        <div class="form-row">
+          <button type="submit" class="btn-primary">Buscar</button>
+        </div>
+      </form>
 
-        <!-- Formulário de Pesquisa por CNPJ -->
-        <form id="cnpj-form" method="POST" action="{{ url_for('cnpj') }}" class="form-container" style="display: none;">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="cnpj">CNPJ</label>
-                    <input type="text" id="cnpj" name="cnpj" placeholder="Digite CNPJ">
-                </div>
-            </div>
-            <div class="form-row">
-                <button type="submit" class="btn-primary">Buscar</button>
-            </div>
+      <!-- Formulário de Pesquisa Coringa -->
+      <form
+        id="coringa-form"
+        method="POST"
+        action="{{ url_for('coringa') }}"
+        class="form-container"
+        style="display: none"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="coringa"
+              >Pesquisa Coringa - Empresário individual</label
+            >
+            <input
+              type="text"
+              id="coringa"
+              name="coringa"
+              placeholder="Digite Nome, Email ou Telefone"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn-primary">Buscar</button>
+        </div>
+      </form>
+
+      <!-- Formulário para Unificação de Arquivos Excel -->
+      <form
+        id="unificar-excel-form"
+        method="POST"
+        enctype="multipart/form-data"
+        action="{{ url_for('process_excel') }}"
+        style="display: none"
+      >
+        <div class="form-row">
+          <div class="form-group">
+            <label for="excel-files"
+              >Selecione os arquivos Excel para unificação:</label
+            >
+            <input
+              type="file"
+              id="excel-files"
+              name="excel_files"
+              multiple
+              accept=".xlsx, .xls"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn-primary">
+            Unificar Escrituras e Procurações
+          </button>
+        </div>
+      </form>
+
+      <!-- Título de Resultados, inicialmente oculto -->
+      <h2 id="results-title" style="display: none">Resultados</h2>
+
+      <!-- Resultados -->
+      {% if estabelecimentos_cnpj %}
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          document.getElementById("results-title").style.display = "block";
+          document.getElementById("loading-image").style.display = "none"; // Oculta a imagem de carregamento
+        });
+      </script>
+
+      <!-- Abas para cada CNPJ Raiz -->
+      <div class="tab">
+        {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
+        <button class="tablink" onclick="openTab(event, 'tab{{ raiz }}')">
+          {{ raiz }}
+        </button>
+        {% endfor %}
+      </div>
+
+      <div class="form-row">
+        <form method="GET" action="{{ url_for('export_excel') }}">
+          <button type="submit" class="btn-primary">
+            Exportar dados para Excel
+          </button>
         </form>
+      </div>
 
-       <!-- Formulário de Pesquisa por Nome e CPF -->
-        <form id="nome-cpf-form" method="POST" action="{{ url_for('nome_cpf') }}" class="form-container" style="display: none;">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" placeholder="Digite Nome" required>
-                </div>
-                <div class="form-group">
-                    <label for="identificador">CPF/CNPJ</label>
-                    <input type="text" id="identificador" name="identificador" placeholder="Digite CPF/CNPJ" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <button type="submit" class="btn-primary">Buscar</button>
-            </div>
-        </form>
-
-        <!-- Formulário de Pesquisa Coringa -->
-        <form id="coringa-form" method="POST" action="{{ url_for('coringa') }}" class="form-container" style="display: none;">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="coringa">Pesquisa Coringa - Empresário individual</label>
-                    <input type="text" id="coringa" name="coringa" placeholder="Digite Nome, Email ou Telefone">
-                </div>
-            </div>
-            <div class="form-row">
-                <button type="submit" class="btn-primary">Buscar</button>
-            </div>
-        </form>
-
-        <!-- Formulário para Unificação de Arquivos Excel -->
-        <form id="unificar-excel-form" method="POST" enctype="multipart/form-data" action="{{ url_for('process_excel') }}" style="display: none;">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="excel-files">Selecione os arquivos Excel para unificação:</label>
-                    <input type="file" id="excel-files" name="excel_files" multiple accept=".xlsx, .xls">
-                </div>
-            </div>
-            <div class="form-row">
-                <button type="submit" class="btn-primary">Unificar Escrituras e Procurações</button>
-            </div>
-        </form>
-
-        <!-- Título de Resultados, inicialmente oculto -->
-        <h2 id="results-title" style="display: none;">Resultados</h2>
-
-        <!-- Resultados -->
-        {% if estabelecimentos_cnpj %}
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    document.getElementById("results-title").style.display = "block";
-                    document.getElementById("loading-image").style.display = "none"; // Oculta a imagem de carregamento
-                });
-            </script>
-
-            <!-- Abas para cada CNPJ Raiz -->
-            <div class="tab">
-                {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
-                    <button class="tablink" onclick="openTab(event, 'tab{{ raiz }}')">
-                        {{ raiz }}
-                    </button>
-                {% endfor %}
-            </div>
-            
-            <div class="form-row">
-                <form method="GET" action="{{ url_for('export_excel') }}">
-                    <button type="submit" class="btn-primary">Exportar dados para Excel</button>
-                </form>
-            </div>
-
-            <!-- Conteúdo das abas para cada CNPJ Raiz -->
-            {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
-            <div id="tab{{ raiz }}" class="tab-content">
-                {% for index in range(estabelecimentos_cnpj|length) %}
-                    {% if estabelecimentos_Cnpj_Raiz[index] == raiz %}
-                        <div class="result-block">
-                            <h3>{{ empresas_nome[index] }}</h3>
-                            <p><strong>CNPJ:</strong> {{ estabelecimentos_cnpj[index] }}</p>
-                            <p><strong>Nome:</strong> {{ empresas_nome[index] }}</p>
-                            <p><strong>Constituição:</strong> {{ estabelecimentos_data_de_inicio_de_atividade[index] }}</p>
-                            <p><strong>Filial ou Matriz:</strong> {{ estabelecimentos_identificador_matriz_filial[index] }}</p>
-                            <p><strong>Endereço:</strong> {{ estabelecimentos_endereco[index] }}</p>
-                            <p><strong>Status:</strong>
-                                <span class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red
-                                             {% elif estabelecimentos_situacao_cadastral[index] in ['Inapta', 'Suspensa'] %}status-orange
-                                             {% else %}status-green{% endif %}">
-                                    {{ estabelecimentos_situacao_cadastral[index] }}
-                                </span>
-                            </p>
-                            <p><strong>Data Status:</strong> {{ estabelecimentos_data_situacao_cadastral[index] }}</p>
-                            <p><strong>Motivo Status:</strong> {{ estabelecimentos_motivo_situacao_cadastral[index] }}</p>
-                            <p><strong>QSA:</strong></p>
-                                                    <p>
-                                                        {% for qsa_item in (socios_socios[index] or '').split('\n') %}
-                                                            {{ qsa_item }}<br>
-                                                        {% endfor %}
-                                                    </p>
-                            <p><strong>Representante:</strong> {{ socios_repre_legal[index] }}</p>
-                            <p><strong>Nome Representante:</strong> {{ socios_nome_repre[index] }}</p>
-                            <p><strong>Qualificação Representante:</strong> {{ socios_quali_repre[index] }}</p>
-                            <p><strong>País:</strong> {{ socios_pais[index] }}</p>
-                            <p><strong>Capital Social:</strong> {{ empresas_capital_social[index] }}</p>
-                            <p><strong>Ente Federativo:</strong> {{ empresas_ente_federativo[index] }}</p>
-                            <p><strong>Qualificação Responsável:</strong> {{ empresas_quali_responsavel[index] }}</p>
-                            <p><strong>Natureza Jurídica:</strong> {{ empresas_natureza_juridica[index] }}</p>
-                            <p><strong>Porte:</strong> {{ empresas_porte[index] }}</p>
-                            <p><strong>Nome Fantasia:</strong> {{ estabelecimentos_nome_fantasia[index] }}</p>
-                            <p><strong>Cidade Exterior:</strong> {{ estabelecimentos_cidade_exterior[index] }}</p>
-                            <p><strong>País:</strong> {{ estabelecimentos_pais[index] }}</p>
-                            <p><strong>CNAE Principal:</strong> {{ estabelecimentos_cnae_principal[index] }}</p>
-                            <p><strong>CNAE Secundário:</strong> {{ estabelecimentos_cnae_secundario[index] }}</p>
-                            <p><strong>Telefones:</strong> {{ estabelecimentos_telefones[index] }}</p>
-                            <p><strong>Email:</strong> {{ estabelecimentos_correio_eletronico[index] }}</p>
-                            <p><strong>Situação Especial:</strong> {{ estabelecimentos_situacao_especial[index] }}</p>
-                            <p><strong>Data da Situação Especial:</strong> {{ estabelecimentos_data_situacao_especial[index] }}</p>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
+      <!-- Conteúdo das abas para cada CNPJ Raiz -->
+      {% for raiz in estabelecimentos_Cnpj_Raiz|unique %}
+      <div id="tab{{ raiz }}" class="tab-content">
+        {% for index in range(estabelecimentos_cnpj|length) %} {% if
+        estabelecimentos_Cnpj_Raiz[index] == raiz %}
+        <div class="result-block">
+          <h3>{{ empresas_nome[index] }}</h3>
+          <p><strong>CNPJ:</strong> {{ estabelecimentos_cnpj[index] }}</p>
+          <p><strong>Nome:</strong> {{ empresas_nome[index] }}</p>
+          <p>
+            <strong>Constituição:</strong> {{
+            estabelecimentos_data_de_inicio_de_atividade[index] }}
+          </p>
+          <p>
+            <strong>Filial ou Matriz:</strong> {{
+            estabelecimentos_identificador_matriz_filial[index] }}
+          </p>
+          <p>
+            <strong>Endereço:</strong> {{ estabelecimentos_endereco[index] }}
+          </p>
+          <p>
+            <strong>Status:</strong>
+            <span
+              class="{% if estabelecimentos_situacao_cadastral[index] == 'Baixada' %}status-red {% elif estabelecimentos_situacao_cadastral[index] in ['Inapta', 'Suspensa'] %}status-orange {% else %}status-green{% endif %}"
+            >
+              {{ estabelecimentos_situacao_cadastral[index] }}
+            </span>
+          </p>
+          <p>
+            <strong>Data Status:</strong> {{
+            estabelecimentos_data_situacao_cadastral[index] }}
+          </p>
+          <p>
+            <strong>Motivo Status:</strong> {{
+            estabelecimentos_motivo_situacao_cadastral[index] }}
+          </p>
+          <p><strong>QSA:</strong></p>
+          <p>
+            {% for qsa_item in (socios_socios[index] or '').split('\n') %} {{
+            qsa_item }}<br />
             {% endfor %}
-        {% endif %}
+          </p>
+          <p><strong>Representante:</strong> {{ socios_repre_legal[index] }}</p>
+          <p>
+            <strong>Nome Representante:</strong> {{ socios_nome_repre[index] }}
+          </p>
+          <p>
+            <strong>Qualificação Representante:</strong> {{
+            socios_quali_repre[index] }}
+          </p>
+          <p><strong>País:</strong> {{ socios_pais[index] }}</p>
+          <p>
+            <strong>Capital Social:</strong> {{ empresas_capital_social[index]
+            }}
+          </p>
+          <p>
+            <strong>Ente Federativo:</strong> {{ empresas_ente_federativo[index]
+            }}
+          </p>
+          <p>
+            <strong>Qualificação Responsável:</strong> {{
+            empresas_quali_responsavel[index] }}
+          </p>
+          <p>
+            <strong>Natureza Jurídica:</strong> {{
+            empresas_natureza_juridica[index] }}
+          </p>
+          <p><strong>Porte:</strong> {{ empresas_porte[index] }}</p>
+          <p>
+            <strong>Nome Fantasia:</strong> {{
+            estabelecimentos_nome_fantasia[index] }}
+          </p>
+          <p>
+            <strong>Cidade Exterior:</strong> {{
+            estabelecimentos_cidade_exterior[index] }}
+          </p>
+          <p><strong>País:</strong> {{ estabelecimentos_pais[index] }}</p>
+          <p>
+            <strong>CNAE Principal:</strong> {{
+            estabelecimentos_cnae_principal[index] }}
+          </p>
+          <p>
+            <strong>CNAE Secundário:</strong> {{
+            estabelecimentos_cnae_secundario[index] }}
+          </p>
+          <p>
+            <strong>Telefones:</strong> {{ estabelecimentos_telefones[index] }}
+          </p>
+          <p>
+            <strong>Email:</strong> {{
+            estabelecimentos_correio_eletronico[index] }}
+          </p>
+          <p>
+            <strong>Situação Especial:</strong> {{
+            estabelecimentos_situacao_especial[index] }}
+          </p>
+          <p>
+            <strong>Data da Situação Especial:</strong> {{
+            estabelecimentos_data_situacao_especial[index] }}
+          </p>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      {% endfor %} {% endif %}
     </div>
-
-    <script>
-        function resetPage() {
-            document.getElementById("search-type").value = ""; 
-            toggleSearchFields(); 
-            document.getElementById("results-title").style.display = "none"; 
-            document.getElementById("loading-image").style.display = "none"; // Oculta a imagem de carregamento ao carregar a página
-        }
-        
-        // Mostra o GIF de carregamento ao enviar qualquer formulário de pesquisa
-        document.addEventListener("submit", function(event) {
-            document.getElementById("loading-image").style.display = "flex";
-        });
-
-        // Oculta o GIF de carregamento após o carregamento da página com novos resultados
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("loading-image").style.display = "none"; // Esconde o GIF ao completar o carregamento inicial
-        });
-
-        // Esconde o GIF após o término da exportação e unificação usando um truque com tempo (melhorar com backend seria ideal)
-        function hideLoadingImage() {
-            document.getElementById("loading-image").style.display = "none";
-        }
-        
-        // Eventos para monitorar quando o Excel é exportado ou unificado
-        document.querySelector("form[action*='export_excel']").onsubmit = function() {
-            document.getElementById("loading-image").style.display = "flex";
-            setTimeout(hideLoadingImage, 3000);  // Ajuste o tempo conforme necessário
-        };
-
-        document.querySelector("form[action*='process_excel']").onsubmit = function() {
-            document.getElementById("loading-image").style.display = "flex";
-            setTimeout(hideLoadingImage, 3000);  // Ajuste o tempo conforme necessário
-        };
-        
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            tablinks = document.getElementsByClassName("tablink");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-
-        function toggleSearchFields() {
-            const searchType = document.getElementById("search-type").value;
-            document.getElementById("cnpj-form").style.display = "none";
-            document.getElementById("nome-cpf-form").style.display = "none";
-            document.getElementById("coringa-form").style.display = "none";
-            document.getElementById("unificar-excel-form").style.display = "none";
-
-            if (searchType === "cnpj") {
-                document.getElementById("cnpj-form").style.display = "block";
-            } else if (searchType === "nome-cpf") {
-                document.getElementById("nome-cpf-form").style.display = "block";
-            } else if (searchType === "coringa") {
-                document.getElementById("coringa-form").style.display = "block";
-            } else if (searchType === "unificar-excel") {
-                document.getElementById("unificar-excel-form").style.display = "block";
-            }
-        }
-    </script>
-</body>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- Incluindo o arquivo JavaScript externo -->
+  </body>
 </html>
