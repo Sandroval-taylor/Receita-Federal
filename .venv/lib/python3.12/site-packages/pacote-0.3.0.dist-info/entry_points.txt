@@ -1,0 +1,3 @@
+[console_scripts]
+pacote-script=pacote.cli:cli
+

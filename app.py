@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flasgger import Swagger
 from flask_cors import CORS
-from receita import api_pesquisa
+from API import api_pesquisa
 from exportarExcel import export_excel
 from unificarEscProc import process_excel
 import config
@@ -33,7 +33,7 @@ def index():
     return render_template("index.html", **config.template())# Renderiza a página com variáveis zeradas
 
 # Rotas da API
-app.add_url_rule("/receita", "API", api_pesquisa, methods=["POST"])
+app.add_url_rule("/API", "API", api_pesquisa, methods=["POST"])
 
 # Rotas de exportação e processamento
 app.add_url_rule("/exportarExcel", "export_excel", export_excel, methods=["GET"])
